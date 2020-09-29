@@ -1,0 +1,177 @@
+/*
+ * Copyright (c) 2017 MediaTek Inc.
+ * Author: Dehui.Sun <dehui.sun@mediatek.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/dts-v1/;
+#include "leopard-dev.dtsi"
+
+/ {
+	model = "MediaTek Leopard RFB1 board";
+	compatible = "mediatek,mt7629-rfb1", "mediatek,mt7629";
+
+	chosen {
+		bootargs = "earlycon=uart8250,mmio32,0x11002000 console=ttyS0,115200n1 \
+loglevel=8";
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0 0x40000000 0 0x10000000>;
+	};
+};
+
+&eth {
+	status = "okay";
+
+	gmac0: mac@0 {
+		compatible = "mediatek,eth-mac";
+		reg = <0>;
+		phy-mode = "sgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+			pause;
+		};
+	};
+
+	gmac1: mac@1 {
+		compatible = "mediatek,eth-mac";
+		reg = <1>;
+		phy-handle = <&phy0>;
+	};
+
+	mdio: mdio-bus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		phy0: ethernet-phy@5 {
+			reg = <0>;
+			phy-mode = "gmii";
+		};
+	};
+};
+
+&rtkgsw {
+	mediatek,mdio = <&mdio>;
+	mediatek,reset-pin = <&pio 54 0>;
+	status = "okay";
+};
+
+&i2c0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	status = "okay";
+};
+
+&pcie {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pcie_default>;
+};
+
+&pio {
+	i2c0_pins: i2c0@0 {
+		pins_bus {
+			groups = "i2c_0";
+			function = "i2c";
+			bias-disable;
+		};
+	};
+
+	pinctrl_pcie_default: pcie-default {
+		mux-pcie_clkreq {
+			groups = "pcie_clkreq";
+			function = "pcie";
+		};
+		mux-pcie_pereset {
+			groups = "pcie_pereset";
+			function = "pcie";
+		};
+		mux-pcie_wake {
+			groups = "pcie_wake";
+			function = "pcie";
+		};
+	};
+};
+
+&pwm {
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&snand {
+	status = "okay";
+	flash@0 {
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "Bootloader";
+				reg = <0x00000 0x0100000>;
+				read-only;
+			};
+
+			partition@100000 {
+				label = "Config";
+				reg = <0x100000 0x0040000>;
+			};
+
+			partition@140000 {
+				label = "Factory";
+				reg = <0x140000 0x0080000>;
+			};
+
+			partition@1c0000 {
+				label = "Kernel";
+				reg = <0x1c0000 0x1000000>;
+			};
+		};
+	};
+};
+
+&nor_flash {
+	status = "okay";
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		partition@00000 {
+			label = "Bootloader";
+			reg = <0x00000 0x0060000>;
+		};
+		partition@60000 {
+			label = "Config";
+			reg = <0x60000 0x0010000>;
+		};
+		partition@70000 {
+			label = "Factory";
+			reg = <0x70000 0x0040000>;
+		};
+		partition@b0000 {
+			label = "Kernel";
+			reg = <0xb0000 0xb50000>;
+		};
+	};
+};
+
+&u3phy1 {
+	status = "okay";
+};
+
+&xhci {
+	status = "okay";
+};
